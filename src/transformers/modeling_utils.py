@@ -2667,15 +2667,15 @@ class PreTrainedModel(nn.Module, ModuleUtilsMixin, GenerationMixin, PushToHubMix
                         f"Please upgrade accelerate with `pip install -U accelerate`"
                     )
                 # init state_dict for this shard
-                shard_state_dict = {name: "" for name in shard}
+                sub_state_dict = {name: "" for name in shard}
                 for module_name in shard:
                     module = module_map[module_name]
                     # update state dict with onloaded parameters
-                    shard_state_dict = get_state_dict_from_offload(module, module_name, shard_state_dict)
+                    sub_state_dict = get_state_dict_from_offload(module, module_name, sub_state_dict)
 
-                # assign shard to be the completed state dict
-                shard = shard_state_dict
-                del shard_state_dict
+                # assign shard to be the completed state dict for this shard file
+                shard = sub_state_dict
+                del sub_state_dict
                 gc.collect()
 
             if safe_serialization:
